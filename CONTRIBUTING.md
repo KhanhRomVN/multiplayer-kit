@@ -1,57 +1,57 @@
 # Contributing to Multiplayer Pause Mod
 
-Cảm ơn bạn đã quan tâm đến việc đóng góp cho Multiplayer Pause Mod! 🎉
+Thank you for your interest in contributing to Multiplayer Pause Mod! 🎉
 
-## 📋 Mục lục
+## 📋 Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
-- [Làm thế nào để đóng góp](#làm-thế-nào-để-đóng-góp)
+- [How to Contribute](#how-to-contribute)
 - [Development Setup](#development-setup)
 - [Coding Standards](#coding-standards)
 - [Pull Request Process](#pull-request-process)
-- [Báo cáo Bug](#báo-cáo-bug)
-- [Đề xuất tính năng](#đề-xuất-tính-năng)
+- [Bug Reports](#bug-reports)
+- [Feature Requests](#feature-requests)
 
 ## Code of Conduct
 
-Dự án này tuân theo nguyên tắc tôn trọng và chuyên nghiệp. Vui lòng:
-- Tôn trọng ý kiến và quan điểm khác nhau
-- Chấp nhận phản hồi mang tính xây dựng
-- Tập trung vào điều tốt nhất cho cộng đồng
-- Thể hiện sự đồng cảm với các thành viên khác
+This project adheres to principles of respect and professionalism. Please:
+- Respect different opinions and viewpoints.
+- Accept constructive feedback.
+- Focus on what is best for the community.
+- Show empathy towards other members.
 
-## Làm thế nào để đóng góp
+## How to Contribute
 
-### 1. Fork và Clone
+### 1. Fork and Clone
 
 ```bash
-# Fork repo trên GitHub, sau đó clone
+# Fork repo on GitHub, then clone
 git clone https://github.com/YOUR_USERNAME/multiplayer-pause.git
 cd multiplayer-pause
 ```
 
-### 2. Tạo Branch mới
+### 2. Create a New Branch
 
 ```bash
 git checkout -b feature/amazing-feature
-# hoặc
+# or
 git checkout -b fix/bug-description
 ```
 
-### 3. Thực hiện thay đổi
+### 3. Make Changes
 
-- Viết code rõ ràng, dễ hiểu
-- Thêm comments khi cần thiết
-- Tuân theo [Coding Standards](#coding-standards)
+- Write clear, understandable code.
+- Add comments where necessary.
+- Follow [Coding Standards](#coding-standards).
 
-### 4. Test thay đổi
+### 4. Test Changes
 
 ```bash
 # Build mod
 ./gradlew jar
 
-# Test trong Mindustry
-# Copy build/libs/pause-modDesktop.jar vào thư mục mods
+# Test in Mindustry
+# Copy build/libs/multiplayer-pause-pc-v2-v<version>.jar to mods folder
 ```
 
 ### 5. Commit
@@ -62,30 +62,30 @@ git commit -m "feat: add amazing feature"
 ```
 
 **Commit Message Format:**
-- `feat:` - Tính năng mới
+- `feat:` - New feature
 - `fix:` - Bug fix
-- `docs:` - Thay đổi documentation
-- `style:` - Code formatting (không ảnh hưởng logic)
+- `docs:` - Documentation changes
+- `style:` - Code formatting (logic unchanged)
 - `refactor:` - Code refactoring
-- `test:` - Thêm tests
+- `test:` - Adding tests
 - `chore:` - Maintenance tasks
 
-### 6. Push và tạo Pull Request
+### 6. Push and Create Pull Request
 
 ```bash
 git push origin feature/amazing-feature
 ```
 
-Sau đó tạo Pull Request trên GitHub.
+Then create a Pull Request on GitHub.
 
 ## Development Setup
 
 ### Requirements
 
-- **Java**: JDK 8 hoặc cao hơn
-- **Gradle**: Wrapper included (không cần cài riêng)
-- **Mindustry**: v154+ để test
-- **IDE**: IntelliJ IDEA hoặc Eclipse (khuyến nghị)
+- **Java**: JDK 8 or higher
+- **Gradle**: Wrapper included (no need to install separately)
+- **Mindustry**: v154+ for testing
+- **IDE**: IntelliJ IDEA or Eclipse (recommended)
 
 ### Build Commands
 
@@ -93,10 +93,10 @@ Sau đó tạo Pull Request trên GitHub.
 # Build desktop version
 ./gradlew jar
 
-# Build Android version (cần Android SDK)
+# Build Android version (requires Android SDK)
 ./gradlew jarAndroid
 
-# Build cả hai
+# Build both
 ./gradlew deploy
 
 # Clean build
@@ -105,17 +105,17 @@ Sau đó tạo Pull Request trên GitHub.
 
 ### Testing
 
-1. Build mod với `./gradlew jar`
-2. Copy `build/libs/pause-modDesktop.jar` vào thư mục mods của Mindustry
-3. Restart Mindustry
-4. Test trong multiplayer mode
+1. Build mod with `./gradlew jar`
+2. Copy `build/libs/multiplayer-pause-pc-v2-v<version>.jar` to Mindustry mods folder.
+3. Restart Mindustry.
+4. Test in multiplayer mode.
 
 ## Coding Standards
 
 ### Java Style Guide
 
-- **Indentation**: 4 spaces (không dùng tabs)
-- **Line length**: Tối đa 120 characters
+- **Indentation**: 4 spaces (no tabs)
+- **Line length**: Maximum 120 characters
 - **Naming conventions**:
   - Classes: `PascalCase`
   - Methods/Variables: `camelCase`
@@ -145,9 +145,9 @@ Menus.infoToast(Strings.format("@ @ the game.",p==null?"[lightgray]Unknown playe
 
 ### Comments
 
-- Viết comments cho logic phức tạp
-- Sử dụng JavaDoc cho public methods
-- Giải thích **WHY**, không chỉ **WHAT**
+- Write comments for complex logic.
+- Use JavaDoc for public methods.
+- Explain **WHY**, not just **WHAT**.
 
 ```java
 /**
@@ -162,21 +162,21 @@ void broadcastPauseState(Player player, boolean paused) {
 
 ## Pull Request Process
 
-1. **Update documentation** nếu cần
-2. **Update CHANGELOG.md** với thay đổi của bạn
-3. **Ensure builds successfully**: `./gradlew jar` không có lỗi
-4. **Test thoroughly** trong multiplayer environment
+1. **Update documentation** if needed.
+2. **Update CHANGELOG.md** with your changes.
+3. **Ensure builds successfully**: `./gradlew jar` has no errors.
+4. **Test thoroughly** in multiplayer environment.
 5. **Write clear PR description**:
-   - Mô tả thay đổi
-   - Lý do thay đổi
-   - Screenshots/GIFs nếu có UI changes
-   - Test cases đã thực hiện
+   - Description of changes
+   - Reason for changes
+   - Screenshots/GIFs if UI changes
+   - Test cases performed
 
 ### PR Template
 
 ```markdown
 ## Description
-[Mô tả ngắn gọn về thay đổi]
+[Short description of changes]
 
 ## Type of Change
 - [ ] Bug fix
@@ -191,7 +191,7 @@ void broadcastPauseState(Player player, boolean paused) {
 - [ ] Tested with different settings combinations
 
 ## Screenshots
-[Nếu có UI changes]
+[If UI changes]
 
 ## Checklist
 - [ ] Code follows style guidelines
@@ -203,19 +203,19 @@ void broadcastPauseState(Player player, boolean paused) {
 - [ ] Builds successfully
 ```
 
-## Báo cáo Bug
+## Bug Reports
 
-### Trước khi báo cáo
+### Before Reporting
 
-- Kiểm tra [Issues](../../issues) xem bug đã được báo cáo chưa
-- Đảm bảo bạn đang dùng phiên bản mới nhất
-- Test với mod configuration mặc định
+- Check [Issues](../../issues) to see if the bug has already been reported.
+- Ensure you are using the latest version.
+- Test with default mod configuration.
 
 ### Bug Report Template
 
 ```markdown
 **Describe the bug**
-[Mô tả rõ ràng và ngắn gọn về bug]
+[Clear and concise description of the bug]
 
 **To Reproduce**
 Steps to reproduce:
@@ -224,10 +224,10 @@ Steps to reproduce:
 3. See error
 
 **Expected behavior**
-[Mô tả hành vi mong đợi]
+[Description of expected behavior]
 
 **Screenshots**
-[Nếu có]
+[If available]
 
 **Environment:**
  - Mindustry Version: [e.g. v155]
@@ -236,33 +236,33 @@ Steps to reproduce:
  - Multiplayer: [Host/Client]
 
 **Additional context**
-[Thông tin thêm về bug]
+[More info about the bug]
 ```
 
-## Đề xuất tính năng
+## Feature Requests
 
 ### Feature Request Template
 
 ```markdown
 **Is your feature request related to a problem?**
-[Mô tả vấn đề, e.g. "I'm always frustrated when..."]
+[Describe the problem, e.g. "I'm always frustrated when..."]
 
 **Describe the solution you'd like**
-[Mô tả rõ ràng về tính năng mong muốn]
+[Clear description of desired feature]
 
 **Describe alternatives you've considered**
-[Các giải pháp thay thế bạn đã xem xét]
+[Alternative solutions you've considered]
 
 **Additional context**
-[Screenshots, mockups, hoặc thông tin thêm]
+[Screenshots, mockups, or more info]
 ```
 
 ## Questions?
 
-Nếu có câu hỏi, vui lòng:
-- Mở [Discussion](../../discussions)
-- Hoặc tạo [Issue](../../issues) với label `question`
+If you have questions, please:
+- Open a [Discussion](../../discussions)
+- Or create an [Issue](../../issues) with label `question`
 
 ---
 
-**Cảm ơn bạn đã đóng góp! 🚀**
+**Thank you for contributing! 🚀**

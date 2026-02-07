@@ -4,31 +4,31 @@
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/Version-3.0-orange.svg)](CHANGELOG.md)
 
-Một mod Mindustry cho phép người chơi không phải host cũng có thể tạm dừng (pause) game trong chế độ multiplayer.
+A Mindustry mod that allows non-host players to pause the game in multiplayer mode.
 
-## ✨ Tính năng
+## ✨ Features
 
-- 🎮 **Pause Multiplayer**: Cho phép bất kỳ người chơi nào (không chỉ host) tạm dừng game
-- 🔔 **Toast Notifications**: Hiển thị thông báo khi ai đó pause/unpause game
-- 🔐 **Kiểm soát quyền**: Host có thể giới hạn chỉ admin mới được pause
-- 🔄 **Tự động đồng bộ**: Tùy chọn tự động sync khi pause/unpause để giảm desync
-- ⚡ **Responsive**: Cập nhật trạng thái pause ngay lập tức cho tất cả clients
+- 🎮 **Multiplayer Pause**: Allows any player (not just the host) to pause the game.
+- 🔔 **Toast Notifications**: Displays a notification when someone pauses/unpauses the game.
+- 🔐 **Permission Control**: Host can restrict pausing to admins only.
+- 🔄 **Auto-Sync**: Optional auto-sync on pause/unpause to reduce desync.
+- ⚡ **Responsive**: Immediate pause state updates for all clients.
 
-## 📋 Yêu cầu
+## 📋 Requirements
 
-- **Mindustry**: Phiên bản 154 trở lên
-- **Cài đặt**: Cả host và người chơi muốn pause đều cần cài mod này
+- **Mindustry**: Version 154 or higher
+- **Installation**: Both the host and players who want to pause need to install this mod.
 
-## 🚀 Cài đặt
+## 🚀 Installation
 
-### Cách 1: Từ file JAR
-1. Tải file `pause-mod.jar` từ [Releases](../../releases)
-2. Mở Mindustry
-3. Vào **Mods** → **Open Mod Folder**
-4. Copy file JAR vào thư mục mods
-5. Restart Mindustry
+### Method 1: From JAR file
+1. Download `multiplayer-pause-pc-v2-v<version>.jar` from [Releases](../../releases).
+2. Open Mindustry.
+3. Go to **Mods** → **Open Mod Folder**.
+4. Copy the JAR file into the `mods` folder.
+5. Restart Mindustry.
 
-### Cách 2: Build từ source
+### Method 2: Build from source
 ```bash
 # Clone repository
 git clone https://github.com/KhanhRomVN/multiplayer-pause.git
@@ -37,48 +37,48 @@ cd multiplayer-pause
 # Build mod
 ./gradlew jar
 
-# File output sẽ ở: build/libs/pause-modDesktop.jar
+# Output file will be at: build/libs/multiplayer-pause-pc-v2-v<version>.jar
 ```
 
-## 🎯 Sử dụng
+## 🎯 Usage
 
-1. **Pause game**: Nhấn phím pause (mặc định: `Space` hoặc `Pause Break`)
-2. **Unpause**: Nhấn lại phím pause
+1. **Pause game**: Press the pause key (default: `Space` or `Pause Break`).
+2. **Unpause**: Press the pause key again.
 
-### Cấu hình Settings
+### Settings Configuration
 
-Vào **Settings** → **Multiplayer Pause** để điều chỉnh:
+Go to **Settings** → **Multiplayer Pause** to configure:
 
-| Setting | Mô tả | Mặc định |
-|---------|-------|----------|
-| **Toasts** | Hiển thị thông báo khi pause/unpause | ✅ Bật |
-| **Allow Any** | Cho phép bất kỳ ai pause (không chỉ admin) | ❌ Tắt |
-| **Sync on Pause** | Tự động sync khi pause | ❌ Tắt |
-| **Sync on Unpause** | Tự động sync khi unpause | ❌ Tắt |
-| **Schedule Sync** | Lên lịch sync nếu sync gần đây đã thực hiện | ❌ Tắt |
+| Setting | Description | Default |
+|---------|-------------|---------|
+| **Toasts** | Show notification when pausing/unpausing | ✅ On |
+| **Allow Any** | Allow anyone to pause (not just admins) | ❌ Off |
+| **Sync on Pause** | Auto-sync when pausing | ❌ Off |
+| **Sync on Unpause** | Auto-sync when unpausing | ❌ Off |
+| **Schedule Sync** | Schedule sync if a sync happened recently | ❌ Off |
 
-> **Lưu ý**: Bật auto-sync có thể giúp giảm desync nhưng có thể gây lag nếu lạm dụng.
+> **Note**: Enabling auto-sync can help reduce desync but may cause lag if abused.
 
-## 🔧 Cơ chế hoạt động
+## 🔧 How it Works
 
-1. **Client gửi request**: Khi nhấn pause, client gửi packet `multiplayerpause-request` đến server
-2. **Server xử lý**: Server kiểm tra quyền và toggle trạng thái pause
-3. **Broadcast state**: Server gửi packet `multiplayerpause-updatestate` đến tất cả clients
-4. **Clients cập nhật**: Mỗi client cập nhật UI và hiển thị toast notification
+1. **Client sends request**: When pause is pressed, client sends `multiplayerpause-request` packet to server.
+2. **Server processes**: Server checks permissions and toggles pause state.
+3. **Broadcast state**: Server sends `multiplayerpause-updatestate` packet to all clients.
+4. **Clients update**: Each client updates UI and shows toast notification.
 
-Chi tiết kỹ thuật xem tại [docs/API.md](docs/API.md)
+Technical details available at [docs/API.md](docs/API.md).
 
-## 📚 Tài liệu
+## 📚 Documentation
 
-- [API Documentation](docs/API.md) - Chi tiết về packet handlers và API
-- [Settings Guide](docs/SETTINGS.md) - Hướng dẫn chi tiết về settings
-- [Contributing](CONTRIBUTING.md) - Hướng dẫn đóng góp
-- [Changelog](CHANGELOG.md) - Lịch sử thay đổi
+- [API Documentation](docs/API.md) - Details on packet handlers and API.
+- [Settings Guide](docs/SETTINGS.md) - Detailed guide on settings.
+- [Contributing](CONTRIBUTING.md) - Contribution guidelines.
+- [Changelog](CHANGELOG.md) - Change history.
 
 ## 🛠️ Development
 
 ### Build Requirements
-- Java 8 hoặc cao hơn
+- Java 8 or higher
 - Gradle (wrapper included)
 
 ### Build Commands
@@ -86,10 +86,10 @@ Chi tiết kỹ thuật xem tại [docs/API.md](docs/API.md)
 # Build desktop version
 ./gradlew jar
 
-# Build Android version (cần Android SDK)
+# Build Android version (requires Android SDK)
 ./gradlew jarAndroid
 
-# Build cả hai
+# Build both
 ./gradlew deploy
 ```
 
@@ -108,17 +108,17 @@ multiplayer-pause/
 └── README.md                  # This file
 ```
 
-## 🤝 Đóng góp
+## 🤝 Contributing
 
-Contributions, issues và feature requests đều được chào đón!
+Contributions, issues, and feature requests are welcome!
 
-Xem [CONTRIBUTING.md](CONTRIBUTING.md) để biết cách đóng góp.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to contribute.
 
 ## 📝 License
 
-Dự án này được phân phối dưới [MIT License](LICENSE).
+This project is distributed under the [MIT License](LICENSE).
 
-## 👤 Tác giả
+## 👤 Author
 
 **KhanhRomVN**
 
@@ -126,12 +126,12 @@ Dự án này được phân phối dưới [MIT License](LICENSE).
 
 ## 🙏 Credits
 
-- Mod gốc bởi [buthed010203](https://github.com/buthed010203)
-- [Mindustry](https://github.com/Anuken/Mindustry) bởi Anuken
+- Original mod by [buthed010203](https://github.com/buthed010203)
+- [Mindustry](https://github.com/Anuken/Mindustry) by Anuken
 
 ## ⭐ Support
 
-Nếu mod này hữu ích, hãy cho một ⭐ trên GitHub!
+If this mod is helpful, please give it a ⭐ on GitHub!
 
 ---
 
