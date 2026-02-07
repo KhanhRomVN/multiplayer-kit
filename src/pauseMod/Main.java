@@ -52,10 +52,7 @@ public class Main extends Mod {
             s.checkPref("multiplayerpause-synconunpause", false); // Is enabling this by default a good idea? I have no clue how much desync this mod is going to cause...
             s.checkPref("multiplayerpause-schedulesync", false);
             
-            s.sliderPref("multiplayerpause-resourceui-position-idx", 1, 0, 3, i -> {
-                String[] positions = {"Top Left", "Top Right", "Bottom Left", "Bottom Right"};
-                return positions[i];
-            });
+
 
             s.checkPref("multiplayerpause-showotherpreview", true);
             s.checkPref("multiplayerpause-shownames", true);
