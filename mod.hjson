@@ -1,8 +1,8 @@
-DisplayName: "Multiplayer Kit"
-name: "multiplayer-kit"
+DisplayName: "Multiplayer Pause"
+name: "pause-mod"
 author: "KhanhRomVN"
 main: "pauseMod.Main"
 description: "Allows players other than the host to pause in multiplayer. Both the host and the person pausing need the mod. Supports Mindustry v154 with enhanced synchronization features."
 version: 154
 minGameVersion: 154
-hidden: false
+hidden: true

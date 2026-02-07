@@ -16,7 +16,6 @@ import mindustry.mod.*;
 import mindustry.ui.*;
 import mindustry.world.Block;
 
-
 import static arc.Core.*;
 import static mindustry.Vars.*;
 
@@ -24,15 +23,26 @@ public class Main extends Mod {
     private long lastSyncTime;
     private String lastPlans = "";
     private ResourcePreviewUI resourceUI;
-    private Player lastPauser;
 
     @Override
     public void init() {
-        addSettings();
-        resourceUI = new ResourcePreviewUI();
-        setupEvents();
         setupPackets();
+        
+        Events.on(ClientLoadEvent.class, e -> {
+            addSettings();
+            resourceUI = new ResourcePreviewUI();
+            setupEvents();
+        });
     }
+
+    // Keep setupEvents separate or merge? 
+    // setupEvents uses Events.run(Trigger.update), which is fine to register early, 
+    // but resourceUI internal logic needs to run. 
+    // Better to move setupEvents call inside ClientLoadEvent too, 
+    // OR just keep setupEvents registration here but ensure resourceUI is checked.
+    // However, Main.java uses resourceUI in setupEvents triggers.
+    // So setupEvents MUST be called after resourceUI is assigned.
+
 
     void addSettings() {
         ui.settings.addCategory("Multiplayer Pause", Icon.pause, s -> {
@@ -42,20 +52,21 @@ public class Main extends Mod {
             s.checkPref("multiplayerpause-synconunpause", false); // Is enabling this by default a good idea? I have no clue how much desync this mod is going to cause...
             s.checkPref("multiplayerpause-schedulesync", false);
             
-
+            s.sliderPref("multiplayerpause-resourceui-position-idx", 1, 0, 3, i -> {
+                String[] positions = {"Top Left", "Top Right", "Bottom Left", "Bottom Right"};
+                return positions[i];
+            });
 
             s.checkPref("multiplayerpause-showotherpreview", true);
             s.checkPref("multiplayerpause-shownames", true);
-
         });
     }
 
     void setupEvents() {
         Events.run(Trigger.update, () -> {
-            // Only handle pause key in multiplayer for clients. 
-            // For host, we use StateChangeEvent to sync state changes naturally.
-            if (net.active() && net.client() && Core.input.keyTap(Binding.pause) && !renderer.isCutscene() && !scene.hasDialog() && !scene.hasKeyboard() && !ui.restart.isShown() && state.isGame()) {
-                Call.serverPacketReliable("multiplayerpause-request", "");
+            if (Core.input.keyTap(Binding.pause) && !renderer.isCutscene() && !scene.hasDialog() && !scene.hasKeyboard() && !ui.restart.isShown() && state.isGame() && net.active()) {
+                if (net.client()) Call.serverPacketReliable("multiplayerpause-request", ""); // Send pause request
+                else showToast(player, !state.isPaused()); // Show toast for host pausing (inverted as the state hasn't been updated yet)
             }
 
             // Sync plans if paused
@@ -66,9 +77,6 @@ public class Main extends Mod {
                     lastPlans = currentPlans;
                     if (net.client()) {
                         Call.serverPacketReliable("multiplayerpause-syncplans", currentPlans);
-                    } else if (net.server()) {
-                        // Host directly broadcasts its own plans to all clients
-                        Call.clientPacketReliable("multiplayerpause-updateplans", player.id + "|" + currentPlans);
                     }
                 }
             }
@@ -80,7 +88,7 @@ public class Main extends Mod {
         });
 
         Events.run(Trigger.draw, () -> {
-            if (!state.isPaused() || !Core.settings.getBool("multiplayerpause-showotherpreview")) return;
+            if (!state.isPaused() || !net.active() || !Core.settings.getBool("multiplayerpause-showotherpreview")) return;
 
             for (Player p : Groups.player) {
                 if (p == player || p.unit() == null || p.unit().plans.isEmpty()) continue;
@@ -89,14 +97,14 @@ public class Main extends Mod {
                     if (plan.block == null) continue;
 
                     if (plan.breaking) {
-                        // Draw outline with player color
-                        Draw.color(p.color);
+                        // Draw a red outline for breaking
+                        Draw.color(Color.scarlet);
                         Lines.stroke(1f);
                         Lines.rect(plan.drawx() - plan.block.size * tilesize / 2f, plan.drawy() - plan.block.size * tilesize / 2f, plan.block.size * tilesize, plan.block.size * tilesize);
                         Draw.reset();
                     } else {
-                        // Draw the plan with half transparency using the player's color
-                        Draw.color(p.color, 0.5f);
+                        // Draw the plan with half transparency using the block's full region
+                        Draw.color(Color.white, 0.5f);
                         Draw.rect(plan.block.fullIcon, plan.drawx(), plan.drawy(), plan.rotation * 90);
                         Draw.reset();
                     }
@@ -114,27 +122,14 @@ public class Main extends Mod {
                 }
             }
         });
-
-        // Sync state changes on host to all clients
-        Events.on(StateChangeEvent.class, event -> {
-            if (net.server()) {
-                boolean paused = event.to == GameState.State.paused || event.to == GameState.State.menu;
-                boolean previouslyPaused = event.from == GameState.State.paused || event.from == GameState.State.menu;
-                
-                if (paused != previouslyPaused) {
-                    showToast(lastPauser != null ? lastPauser : player, paused);
-                    lastPauser = null; // Reset after use
-                }
-            }
-        });
     }
 
     void setupPackets() {
         netServer.addPacketHandler("multiplayerpause-request", (p, data) -> {
             if (!(p.admin || Core.settings.getBool("multiplayerpause-allowany")) || state.isMenu()) return;
 
-            lastPauser = p;
             state.set(state.isPaused() ? GameState.State.playing : GameState.State.paused);
+            showToast(p, state.isPaused());
         });
         // State changes are forwarded to clients for more responsive pausing (avoids waiting for next stateSnapshot) which should reduce desync (I hope) and allows for toasts
         netClient.addPacketHandler("multiplayerpause-updatestate", data -> {
@@ -162,13 +157,8 @@ public class Main extends Mod {
             // Validate data size to prevent spam/crashes
             if (data.length() > 5000) return; 
 
-            // Update plan for the player on server side so the Host can see it
-            if (p.unit() != null) {
-                p.unit().plans.clear();
-                for (BuildPlan plan : parsePacket(data)) {
-                    p.unit().plans.add(plan);
-                }
-            }
+            // Update plan for the player on server side? Not strictly necessary for preview, but good for consistency.
+            // p.unit().plans = parsePacket(data); // Optional: update server logic if needed.
 
             // Broadcast to other clients
             // Format: "playerID|planData"
@@ -186,10 +176,7 @@ public class Main extends Mod {
             int pid = Strings.parseInt(pidStr);
             Player p = Groups.player.getByID(pid);
             if (p != null && p != player && p.unit() != null) {
-                p.unit().plans.clear();
-                for (BuildPlan plan : parsePacket(plansData)) {
-                    p.unit().plans.add(plan);
-                }
+                p.unit().plans = parsePacket(plansData);
             }
         });
     }
@@ -251,6 +238,4 @@ public class Main extends Mod {
         }
         return out;
     }
-
-
 }

@@ -9,22 +9,16 @@ import arc.util.Align;
 import mindustry.content.Items;
 import mindustry.entities.units.BuildPlan;
 import mindustry.gen.Building;
-import mindustry.gen.Groups;
-import mindustry.gen.Player;
 import mindustry.type.Item;
 import mindustry.type.ItemStack;
 import mindustry.ui.Fonts;
 import mindustry.ui.Styles;
-import mindustry.gen.Tex;
-import arc.scene.event.InputEvent;
-import arc.scene.event.InputListener;
-import arc.scene.event.Touchable;
 
 import static mindustry.Vars.*;
 
 public class ResourcePreviewUI {
-    private Table container;
     private Table table;
+    private ObjectMap<Item, Integer> requiredResources = new ObjectMap<>();
     private ObjectMap<Item, Integer> coreResources = new ObjectMap<>();
     private boolean visible = false;
 
@@ -33,77 +27,12 @@ public class ResourcePreviewUI {
     }
 
     private void build() {
-        container = new Table();
         table = new Table();
-        
-        container.setBackground(Styles.none); // Initial no border
-        container.margin(2f); // Border thickness
-        container.touchable = Touchable.enabled;
-        
         table.setBackground(Styles.black6);
         table.margin(8f);
-        table.touchable = Touchable.enabled;
-
-        // Add inner table to container
-        container.add(table);
-
-        // Drag Listener on the container
-        container.addListener(new InputListener() {
-            float lastX, lastY;
-
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, arc.input.KeyCode button) {
-                lastX = event.stageX;
-                lastY = event.stageY;
-                return true;
-            }
-
-            @Override
-            public void touchDragged(InputEvent event, float x, float y, int pointer) {
-                float dx = event.stageX - lastX;
-                float dy = event.stageY - lastY;
-                
-                float curX = Core.settings.getFloat("multiplayerpause-ui-x", Core.graphics.getWidth() - 4f);
-                float curY = Core.settings.getFloat("multiplayerpause-ui-y", Core.graphics.getHeight() - 180f);
-                
-                Core.settings.put("multiplayerpause-ui-x", curX + dx);
-                Core.settings.put("multiplayerpause-ui-y", curY + dy);
-                Core.settings.put("multiplayerpause-ui-custom", true);
-                
-                updatePosition();
-                
-                lastX = event.stageX;
-                lastY = event.stageY;
-            }
-        });
-
-        // Hover effect state
-        final boolean[] hovered = {false};
-        container.addListener(new InputListener() {
-            @Override
-            public void enter(InputEvent event, float x, float y, int pointer, arc.scene.Element fromActor) {
-                if(pointer == -1) hovered[0] = true;
-            }
-
-            @Override
-            public void exit(InputEvent event, float x, float y, int pointer, arc.scene.Element toActor) {
-                if(pointer == -1) hovered[0] = false;
-            }
-        });
-
-        // Hover effect update
-        container.update(() -> {
-            if (hovered[0]) {
-                container.setBackground(Tex.whiteui);
-                container.color.set(Color.sky); // Border color
-            } else {
-                container.setBackground(Styles.none);
-                container.color.set(Color.white);
-            }
-        });
-
+        
         // Add to HUD
-        ui.hudGroup.addChild(container);
+        ui.hudGroup.addChild(table);
     }
 
     public void update() {
@@ -112,46 +41,65 @@ public class ResourcePreviewUI {
         
         if (shouldShow != visible) {
             visible = shouldShow;
-            container.visible = visible;
+            table.visible = visible;
         }
 
         if (!visible) return;
 
-        // Get core resources once
+        // Update position based on settings
+        updatePosition();
+
+        // Calculate resources
+        calculateRequiredResources();
         getCoreResources();
 
         // Rebuild table content
-        boolean hasData = rebuildTable();
-        
-        // Update visibility
-        if (hasData != container.visible) {
-            container.visible = hasData;
-        }
-        
-        // Always update position to honor the anchor (especially when size changes)
-        if (container.visible) updatePosition();
+        rebuildTable();
     }
 
     private boolean shouldShow() {
-        // Only show when game is paused
-        if (!state.isPaused()) return false;
-        
-        // Show if any player has build plans
-        for (Player p : Groups.player) {
-            if (p.unit() != null && p.unit().plans != null && p.unit().plans.size > 0) return true;
+        // Only show when:
+        // 1. Game is paused
+        // 2. Player exists and has a unit
+        // 3. Unit has build plans
+        // 4. In multiplayer
+        return state.isPaused() 
+            && player != null 
+            && player.unit() != null 
+            && player.unit().plans != null
+            && player.unit().plans.size > 0
+            && net.active();
+    }
+
+    private void calculateRequiredResources() {
+        requiredResources.clear();
+
+        if (player == null || player.unit() == null) return;
+
+        // Iterate through all build plans
+        for (BuildPlan plan : player.unit().plans) {
+            if (!plan.breaking && plan.block != null) {
+                // Get block requirements
+                ItemStack[] requirements = plan.block.requirements;
+                if (requirements != null) {
+                    for (ItemStack stack : requirements) {
+                        int current = requiredResources.get(stack.item, 0);
+                        requiredResources.put(stack.item, current + stack.amount);
+                    }
+                }
+            }
         }
-        
-        return false;
     }
 
     private void getCoreResources() {
         coreResources.clear();
 
-        // Use player's team core (primary player)
         if (player == null || player.team() == null) return;
 
+        // Get nearest core
         Building core = player.team().core();
         if (core != null && core.items != null) {
+            // Get all items from core
             for (Item item : content.items()) {
                 int amount = core.items.get(item);
                 if (amount > 0) {
@@ -161,70 +109,68 @@ public class ResourcePreviewUI {
         }
     }
 
-    private boolean rebuildTable() {
+    private void rebuildTable() {
         table.clear();
         
-        boolean any = false;
-        for (Player p : Groups.player) {
-            if (p.unit() == null || p.unit().plans == null || p.unit().plans.isEmpty()) continue;
+        // Title
+        table.add("Build Preview Resources").color(Color.white).row();
+        table.image().color(Color.gray).fillX().height(3f).pad(4f).row();
 
-            any = true;
-            
-            // Player name row
-            table.add(p.name).color(p.color).left().row();
-            
-            Table resTable = new Table();
-            ObjectMap<Item, Integer> reqs = new ObjectMap<>();
-            
-            for (BuildPlan plan : p.unit().plans) {
-                if (!plan.breaking && plan.block != null && plan.block.requirements != null) {
-                    for (ItemStack stack : plan.block.requirements) {
-                        reqs.put(stack.item, reqs.get(stack.item, 0) + stack.amount);
-                    }
-                }
+        // Display resources
+        if (requiredResources.size == 0) {
+            table.add("No resources required").color(Color.lightGray).row();
+        } else {
+            for (ObjectMap.Entry<Item, Integer> entry : requiredResources) {
+                Item item = entry.key;
+                int required = entry.value;
+                int available = coreResources.get(item, 0);
+
+                // Determine color based on availability
+                Color textColor = available >= required ? Color.green : Color.red;
+
+                Table row = new Table();
+                
+                // Item icon
+                row.image(item.uiIcon).size(32f).padRight(8f);
+                
+                // Item name and amounts
+                String text = item.localizedName + ": " + available + "/" + required;
+                row.add(text).color(textColor).left();
+
+                table.add(row).left().padBottom(4f).row();
             }
-
-            if (reqs.size == 0) {
-                table.add("  No construction").color(Color.lightGray).left().row();
-            } else {
-                int i = 0;
-                for (ObjectMap.Entry<Item, Integer> entry : reqs) {
-                    Item item = entry.key;
-                    int required = entry.value;
-                    int available = coreResources.get(item, 0);
-
-                    Color textColor = available >= required ? Color.white : Color.red;
-
-                    resTable.image(item.uiIcon).size(24f).padLeft(10f).padRight(4f);
-                    resTable.add("-" + required).color(textColor).fontScale(0.8f);
-                    
-                    if (++i % 3 == 0) resTable.row();
-                }
-                table.add(resTable).left().padBottom(4f).row();
-            }
-            
-            table.image().color(Color.gray).fillX().height(1f).pad(2f).row();
         }
 
-        if (any) table.pack();
-        return any;
+        table.pack();
     }
 
     private void updatePosition() {
-        // Default values match the initial "below minimap" position
-        float defaultX = Core.graphics.getWidth() - 4f;
-        float defaultY = Core.graphics.getHeight() - 180f;
+        int index = Core.settings.getInt("multiplayerpause-resourceui-position-idx", 1);
         
-        float x = Core.settings.getFloat("multiplayerpause-ui-x", defaultX);
-        float y = Core.settings.getFloat("multiplayerpause-ui-y", defaultY);
+        float padding = 10f;
         
-        // Anchoring to Top-Right means the table grows DOWN and LEFT from (x, y)
-        container.setPosition(x, y, Align.topRight);
+        switch (index) {
+            case 0: // top-left
+                table.setPosition(padding, Core.graphics.getHeight() - padding, Align.topLeft);
+                break;
+            case 1: // top-right
+                table.setPosition(Core.graphics.getWidth() - padding, Core.graphics.getHeight() - padding, Align.topRight);
+                break;
+            case 2: // bottom-left
+                table.setPosition(padding, padding, Align.bottomLeft);
+                break;
+            case 3: // bottom-right
+                table.setPosition(Core.graphics.getWidth() - padding, padding, Align.bottomRight);
+                break;
+            default:
+                table.setPosition(Core.graphics.getWidth() - padding, Core.graphics.getHeight() - padding, Align.topRight);
+                break;
+        }
     }
 
     public void dispose() {
-        if (container != null) {
-            container.remove();
+        if (table != null) {
+            table.remove();
         }
     }
 }

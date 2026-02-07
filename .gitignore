@@ -167,3 +167,6 @@ bin/
 
 ## Logs
 *.log
+
+temp/
+MindustryTestEnv/
