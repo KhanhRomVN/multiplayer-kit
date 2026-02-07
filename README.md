@@ -1,4 +1,4 @@
-# Multiplayer Pause Mod
+# Multiplayer Kit Mod
 
 [![Mindustry Version](https://img.shields.io/badge/Mindustry-v154-blue.svg)](https://github.com/Anuken/Mindustry)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
@@ -22,7 +22,7 @@ A Mindustry mod that allows non-host players to pause the game in multiplayer mo
 ## 🚀 Installation
 
 ### Method 1: From JAR file
-1. Download `multiplayer-pause-pc-v2-v<version>.jar` from [Releases](../../releases).
+1. Download `multiplayer-kit-v154.jar` from [Releases](../../releases).
 2. Open Mindustry.
 3. Go to **Mods** → **Open Mod Folder**.
 4. Copy the JAR file into the `mods` folder.
@@ -37,7 +37,7 @@ cd multiplayer-pause
 # Build mod
 ./gradlew jar
 
-# Output file will be at: build/libs/multiplayer-pause-pc-v2-v<version>.jar
+# Output file will be at: build/libs/multiplayer-kit-v154.jar
 ```
 
 ## 🎯 Usage

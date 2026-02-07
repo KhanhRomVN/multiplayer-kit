@@ -57,7 +57,7 @@ task jarAndroid{
 }
 
 jar{
-    archiveFileName = "multiplayer-pause-pc-v2-v${version}.jar"
+    archiveFileName = "multiplayer-kit-v${version}.jar"
 
     from{
         configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
